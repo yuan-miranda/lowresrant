@@ -1,192 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Low Resolution Rant</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
         body {
             margin: 0;
             padding: 1.25rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: Arial, Helvetica, sans-serif;
+
         }
-        
+
         .textarea-container {
+            display: flex;
             width: 100%;
-            max-width: 37.5rem;
+            max-width: 40rem;
             margin-top: 1.25rem;
-            position: relative;
         }
-        
-        .font-selector {
-            position: absolute;
-            top: 0;
-            right: -9.25rem;
-            width: 8.75rem;
+
+        .toolbar-row {
+            display: flex;
+            flex-direction: column;
+            margin-left: 0.75rem;
         }
-        
+
+        .font-selector,
         .controls {
-            position: absolute;
-            top: 3.75rem;
-            right: -9.25rem;
-            width: 8.75rem;
+            width: 8rem;
         }
-        
+
         .screenshot-btn {
             width: 100%;
-            padding: 0.65em;
+            padding: 0.75em;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 0.25rem;
             cursor: pointer;
-            font-size: 0.85rem;
-            margin-top: 0.65rem;
+            margin-top: 0.75rem;
         }
-        
+
         .screenshot-btn:hover {
             background-color: #0056b3;
         }
-        
+
         .font-selector label {
             display: block;
             margin-bottom: 0.25em;
-            font-size: 0.85rem;
             color: #333;
         }
-        
+
         .font-selector select {
             width: 100%;
             padding: 0.5em;
             border: 0.15rem solid #ddd;
             border-radius: 0.25rem;
-            font-size: 0.85rem;
             background-color: white;
             cursor: pointer;
         }
-        
+
         .font-selector select:focus {
             outline: none;
             border-color: #007bff;
         }
-        
+
         textarea {
             width: 100%;
-            height: 12.5rem;
-            padding: 0.95em;
+            height: 16rem;
+            padding: 1rem;
             border: 0.15rem solid #ddd;
             border-radius: 0.5rem;
-            font-size: 1rem;
-            font-family: Arial, sans-serif;
             resize: vertical;
-            box-sizing: border-box;
+            font-size: 1rem;
         }
-        
+
         textarea:focus {
             outline: none;
             border-color: #007bff;
         }
-        
+
         @media (max-width: 50rem) {
-            .font-selector, .controls {
-                position: static;
+            .textarea-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .toolbar-row {
+                flex-direction: row;
+                margin-left: 0;
+                margin-top: 0.75rem;
+                gap: 0.5rem;
+            }
+            .font-selector,
+            .controls {
                 width: 100%;
-                margin-bottom: 0.95rem;
+                margin: 0;
+            }
+            .screenshot-btn {
+                margin: 0;
+            }
+            .font-selector label {
+                display: none;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="textarea-container">
-        <div class="font-selector">
-            <label for="fontSizeSelect">Font Size:</label>
-            <select id="fontSizeSelect" onchange="changeFontSize(this.value)">
-                <option value="10px">10px</option>
-                <option value="12px">12px</option>
-                <option value="14px">14px</option>
-                <option value="16px" selected>16px</option>
-                <option value="18px">18px</option>
-                <option value="20px">20px</option>
-                <option value="24px">24px</option>
-                <option value="28px">28px</option>
-                <option value="32px">32px</option>
-                <option value="36px">36px</option>
-            </select>
-        </div>
-        <div class="controls">
-            <button class="screenshot-btn" onclick="takeScreenshot()">Save Screenshot</button>
-        </div>
         <textarea id="mainTextarea" placeholder="Type your input here..."></textarea>
+        <div class="toolbar-row">
+            <div class="font-selector">
+                <label for="fontSizeSelect">Font Size:</label>
+                <select id="fontSizeSelect" onchange="changeFontSize(this.value)">
+                    <option value="10px">10px</option>
+                    <option value="12px">12px</option>
+                    <option value="14px">14px</option>
+                    <option value="16px" selected>16px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                    <option value="24px">24px</option>
+                    <option value="28px">28px</option>
+                    <option value="32px">32px</option>
+                    <option value="36px">36px</option>
+                </select>
+            </div>
+            <div class="controls">
+                <button class="screenshot-btn" onclick="takeScreenshot()">Save Screenshot</button>
+            </div>
+        </div>
     </div>
-    
+
     <script>
+
         const textarea = document.getElementById('mainTextarea');
-        
+        const fontSizeSelect = document.getElementById('fontSizeSelect');
+
         function changeFontSize(fontSize) {
             textarea.style.fontSize = fontSize;
         }
-        
+
         function takeScreenshot() {
             const computedStyle = window.getComputedStyle(textarea);
-            const text = textarea.value || textarea.placeholder;
-            const fontSize = parseInt(computedStyle.fontSize) || 16;
-            const padding = parseInt(computedStyle.paddingLeft) || 15;
-            const lineHeight = fontSize * 1.2;
-            const lines = text.split('\n');
-            
+            const lines = (textarea.value || textarea.placeholder).split('\n');
+            const fontSize = 16,
+                padding = 8,
+                lineHeight = fontSize * 1.2;
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             ctx.font = `${fontSize}px ${computedStyle.fontFamily || 'Arial, sans-serif'}`;
-            
-            let maxWidth = 0;
-            let totalHeight = padding * 2;
-            
+
+            // calculate the maximum line width
+            let maxLineWidth = 0;
             for (const line of lines) {
-                if (line.trim()) {
-                    maxWidth = Math.max(maxWidth, ctx.measureText(line).width);
-                }
-                totalHeight += lineHeight;
+                const width = ctx.measureText(line).width;
+                if (line.trim()) maxLineWidth = Math.max(maxLineWidth, width);
             }
-            totalHeight -= lineHeight;
-            
-            canvas.width = Math.max(200, maxWidth + padding * 2);
-            canvas.height = Math.max(100, totalHeight);
-            
+
+            canvas.width = Math.ceil(maxLineWidth + padding * 2);
+            canvas.height = Math.ceil(padding * 2 + lineHeight * lines.length);
+
             ctx.fillStyle = computedStyle.backgroundColor || 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.strokeStyle = computedStyle.borderColor || '#ddd';
             ctx.lineWidth = parseInt(computedStyle.borderWidth) || 2;
             ctx.strokeRect(0, 0, canvas.width, canvas.height);
-            
+
             ctx.font = `${fontSize}px ${computedStyle.fontFamily || 'Arial, sans-serif'}`;
             ctx.fillStyle = computedStyle.color || 'black';
             ctx.textBaseline = 'top';
-            
+
+            // draw the text
             let y = padding;
             for (let i = 0; i < lines.length; i++) {
-                if (lines[i].trim()) {
-                    ctx.fillText(lines[i], padding, y);
+                const line = lines[i];
+                if (line.trim() && lines.length > 1 && i < lines.length - 1 && line.trim().length > 1) {
+                    const words = line.split(/\s+/);
+                    if (words.length > 1) {
+                        let wordsWidth = 0;
+                        for (const word of words) {
+                            wordsWidth += ctx.measureText(word).width;
+                        }
+                        const spaceWidth = (maxLineWidth - wordsWidth) / (words.length - 1);
+                        let x = padding;
+                        for (let w = 0; w < words.length; w++) {
+                            ctx.fillText(words[w], x, y);
+                            if (w < words.length - 1) x += ctx.measureText(words[w]).width + spaceWidth;
+                        }
+                        y += lineHeight;
+                        continue;
+                    }
                 }
-                if (i < lines.length - 1) {
-                    y += lineHeight;
-                }
+                ctx.fillText(line, padding, y);
+                y += lineHeight;
             }
-            
-            ctx.filter = 'blur(0.2px)';
+
+            // save the canvas as an image
             ctx.drawImage(canvas, 0, 0);
-            
             canvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'lowres-textarea-screenshot.png';
+                a.download = 'lowresrant-save.png';
                 a.click();
                 URL.revokeObjectURL(url);
             });
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            changeFontSize(fontSizeSelect.value);
+        });
     </script>
 </body>
+
 </html>
