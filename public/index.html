@@ -45,7 +45,7 @@
             width: 8rem;
         }
 
-        .screenshot-btn {
+        .save-btn {
             width: 100%;
             padding: 0.75rem;
             background-color: #007bff;
@@ -56,7 +56,7 @@
             margin-top: 0.75rem;
         }
 
-        .screenshot-btn:hover {
+        .save-btn:hover {
             background-color: #0056b3;
         }
 
@@ -121,13 +121,12 @@
             }
 
             .font-selector select,
-            .screenshot-btn {
+            .save-btn {
                 height: 2rem;
                 padding: 0 1rem;
-                /* font-size: 1.25rem; */
             }
 
-            .screenshot-btn {
+            .save-btn {
                 margin: 0;
             }
 
@@ -152,7 +151,7 @@
 
             <div class="toolbar-row">
                 <div class="font-selector">
-                    <label for="fontSizeSelect">Font Size:</label>
+                    <label for="fontSizeSelect">View Size:</label>
                     <select id="fontSizeSelect" onchange="changeFontSize(this.value)">
                         <option value="10px">10px</option>
                         <option value="12px">12px</option>
@@ -167,7 +166,7 @@
                     </select>
                 </div>
                 <div class="controls">
-                    <button class="screenshot-btn" onclick="takeScreenshot()">Save Screenshot</button>
+                    <button class="save-btn" onclick="saveImage()">Save Image</button>
                 </div>
             </div>
         </div>
@@ -182,12 +181,16 @@
             textarea.style.fontSize = fontSize;
         }
 
-        function takeScreenshot() {
+        function saveImage() {
             const computedStyle = window.getComputedStyle(textarea);
             const lines = (textarea.value || textarea.placeholder).split('\n');
-            const fontSize = 16,
-                padding = 8,
-                lineHeight = fontSize * 1.2;
+
+            // increase resolution by upscaling the canvas
+            const scale = 2;
+            const fontSize = 16 * scale;
+            const padding = 4 * scale;
+            const lineHeight = fontSize * 1.2;
+
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             ctx.font = `${fontSize}px ${computedStyle.fontFamily || 'Arial, sans-serif'}`;
@@ -202,11 +205,12 @@
             canvas.width = Math.ceil(maxLineWidth + padding * 2);
             canvas.height = Math.ceil(padding * 2 + lineHeight * lines.length);
 
+            // high resolution but normal size drawing
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(1, 1);
+
             ctx.fillStyle = computedStyle.backgroundColor || 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = computedStyle.borderColor || '#ddd';
-            ctx.lineWidth = parseInt(computedStyle.borderWidth) || 2;
-            ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
             ctx.font = `${fontSize}px ${computedStyle.fontFamily || 'Arial, sans-serif'}`;
             ctx.fillStyle = computedStyle.color || 'black';
@@ -237,8 +241,7 @@
                 y += lineHeight;
             }
 
-            // save the canvas as an image
-            ctx.drawImage(canvas, 0, 0);
+            // Save the canvas as an image (downscale for preview if needed)
             canvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
